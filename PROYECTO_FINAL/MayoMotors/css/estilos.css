@@ -1,0 +1,265 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #CFE0EE;
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Barra de navegación */
+.navbar {
+    background-color: #38B6FF;
+    color: black;
+    padding: 10px 0;  
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.nav-logo {
+    width: 100px;
+    height: auto;
+    display: block;
+    margin-right: 40px;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu li {
+    margin: 0 10px;
+}
+
+.nav-menu li:first-child {
+    margin-left: 0;
+}
+
+.nav-menu a {
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.nav-login {
+    color: black;
+    text-decoration: none;
+    font-size: 18px;
+    margin-right: 20px;
+}
+
+/* Página principal */
+.main-content {
+    padding: 30px 0;
+}
+
+.main-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-container {
+    width: 550px;
+    height: auto;
+    display: block;
+    padding-top: 15%;
+    padding-left: 15%;
+    text-align: center;
+    max-width: 50%;
+}
+
+.content-left {
+    padding-top: 15%;
+    text-align: center;
+    max-width: 50%;
+}
+
+h1 {
+    color: #004ADD;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.europeo {
+    font-style: italic;
+    margin-top: 10px;
+    font-size: 21px;
+}
+
+/* Formularios compartidos */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 16px;
+}
+
+.form-control {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #D9D9D9;
+    border-radius: 5px;
+    background-color: #D9D9D9;
+    font-size: 16px;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    display: block;
+}
+
+/* Formulario de login */
+.login-content {
+    padding: 30px 0;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    min-height: calc(100vh - 150px);
+}
+
+.login-content .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.login-title, .registro-title {
+    color: #004ADD;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+.login-form {
+    background-color: white;
+    border-radius: 5px;
+    padding: 30px;
+    padding-top: 20px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #004ADD;
+    border-bottom: 5px solid #004ADD;
+    text-align: center;
+}
+
+.login-button, .registro-button {
+    background-color: #D9D9D9;
+    color: #333;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    font-size: 14px;
+}
+
+.login-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+.login-links a {
+    color: #004ADD;
+    text-decoration: none;
+}
+
+.single-link {
+    justify-content: center;
+}
+
+.recovery-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Formulario de registro */
+.registro-content {
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: calc(100vh - 150px);
+}
+
+.registro-content .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.registro-form {
+    background-color: white;
+    border-radius: 5px;
+    padding: 30px;
+    padding-top: 20px;
+    width: 100%;
+    max-width: 750px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #004ADD;
+    border-bottom: 5px solid #004ADD;
+    text-align: center;
+}
+
+.form-columns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-right: 10px;
+    text-align: left;
+}
+
+.form-column {
+    width: 48%;
+}
+
+/* Pie de página */
+.footer {
+    background-color: #38B6FF;
+    color: black;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
