@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del coche</title>
+    <link rel="stylesheet" href="../MayoMotors/css/estilos.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container navbar-content">
+            <div class="nav-left">
+                <img src="../MayoMotors/css/logo.png" alt="Logo MayoMotors" class="nav-logo">
+                <ul class="nav-menu">
+                    <li><a href="../MayoMotors/Index.html">Inicio</a></li>
+                    <li><a href="../MayoMotors/Lista_de_coches.html">Lista de coches</a></li>
+                    <li><a href="../MayoMotors/Contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="div-login">
+                <div class="admin-info">
+                    <img src="../MayoMotors/css/sesion.jpg" alt="Usuario" class="user-icon">
+                    <div class="admin-text">
+                        <span>Administrador</span>
+                        <a href="#" class="cerrar-sesion">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="detalles-content">
+        <div class="container">
+            <h2 class="detalles-title">Detalles</h2>
+            
+            <div class="detalles-card">
+                <div class="detalles-subtitle">Detalles del coche</div>
+                
+                <div class="detalles-layout">
+                   
+                    <div class="detalles-col-izquierda">
+                       
+                        <div class="detalles-fila">
+                            <div class="detalle-campo">
+                                <input type="text" class="detalle-input" value="marca" readonly>
+                            </div>
+                            <div class="detalle-campo">
+                                <input type="text" class="detalle-input" value="modelo" readonly>
+                            </div>
+                        </div>
+                     
+                        <div class="detalles-imagen">
+                            <img src="../MayoMotors/css/audi.jpg" alt="Audi A3" class="coche-imagen-grande">
+                        </div>
+                        
+                       
+                        <div class="detalles-propietario">
+                            <div class="detalle-campo-full">
+                                <input type="text" class="detalle-input" value="Nombre Propietario" readonly>
+                            </div>
+                            <div class="detalles-fila">
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="Provincia" readonly>
+                                </div>
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="Teléfono" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+       
+                    <div class="detalles-col-derecha">
+                      
+                        <div class="detalles-caracteristicas">
+                            <div class="detalles-fila">
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="tipo" readonly>
+                                </div>
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="precio" readonly>
+                                </div>
+                            </div>
+                            <div class="detalles-fila">
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="CV" readonly>
+                                </div>
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="año" readonly>
+                                </div>
+                            </div>
+                            <div class="detalles-fila">
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="Km" readonly>
+                                </div>
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="combustible" readonly>
+                                </div>
+                            </div>
+                            <div class="detalles-fila">
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="cambio" readonly>
+                                </div>
+                                <div class="detalle-campo">
+                                    <input type="text" class="detalle-input" value="color" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="descripcion-container">
+                            <textarea class="descripcion-area" readonly>Descripción</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detalles-actions">
+                    <a href="Lista_de_coches.html" class="btn-cerrar">Cerrar</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+   
+</body>
+</html>

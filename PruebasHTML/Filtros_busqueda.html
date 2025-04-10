@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtros de Búsqueda</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <nav class="container navbar-content">
+            <div class="nav-left">
+                <img src="css/logo.png" alt="Logo MayoMotors" class="nav-logo">
+                <ul class="nav-menu">
+                    <li><a href="../MayoMotors/Index.html">Inicio</a></li>
+                    <li><a href="../MayoMotors/Lista_de_coches.html">Lista de coches</a></li>
+                    <li><a href="../MayoMotors/Contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="div-login">
+                <div class="admin-info">
+                    <img src="css/sesion.jpg" alt="Usuario" class="user-icon">
+                    <div class="admin-text">
+                        <span>Administrador</span>
+                        <a href="../MayoMotors/Index.html" class="cerrar-sesion">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="filtros-content">
+        <div class="container">
+            <h2 class="filtros-title">Filtros de busqueda</h2>
+            
+            <div class="filtros-container">
+                <form class="filtros-form">
+                    <div class="filtros-grid">
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="año">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="marca">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="modelo">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="tipo">
+                        </div>
+                        
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="combustible">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="Km">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="precio min">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="precio max">
+                        </div>
+                        
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="provincia">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="color">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="CV">
+                        </div>
+                        <div class="filtro-campo">
+                            <input type="text" class="filtro-input" placeholder="cambio">
+                        </div>
+                    </div>
+                    
+                    <div class="filtros-actions">
+                        <button type="button" class="btn-quitar">Quitar</button>
+                        <button type="button" class="btn-buscar">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+</body>
+</html>
