@@ -46,6 +46,7 @@ CREATE TABLE Coches (
     id_usuario VARCHAR(20) NOT NULL,
     id_provincia VARCHAR(10) NOT NULL,
     id_modelo VARCHAR(10) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     UNIQUE KEY UK1_Coches (matricula),
     FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario),
     FOREIGN KEY (id_provincia) REFERENCES Provincias(id_provincia),
