@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto</title>
+    <link rel="stylesheet" href="../MayoMotors/css/estilos.css">
+</head>
+<body>
+    <header class="navbar">
+        <nav class="container navbar-content">
+            <div class="nav-left">
+                <img src="../MayoMotors/css/logo.png" alt="Logo MayoMotors" class="nav-logo">
+                <ul class="nav-menu">
+                    <li><a href="../MayoMotors/Index.html">Inicio</a></li>
+                    <li><a href="../MayoMotors/Lista_de_coches.html">Lista de coches</a></li>
+                    <li><a href="../MayoMotors/Contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="div-login">
+                <a href="../MayoMotors/Login.html" class="nav-login">Login</a>
+            </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="contacto-content">
+        <div class="container">
+            <h2 class="contacto-title">Contacto</h2>
+            
+            <form class="contacto-form">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correo">Correo:</label>
+                    <input type="email" id="correo" class="form-control" placeholder="sergio@gmail.com" required multiple>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mensaje">Mensaje:</label>
+                    <textarea id="mensaje" class="form-control mensaje-area" rows="6" placeholder="Escriba aquí su mensaje" required></textarea>
+                </div>
+                
+                <button type="submit" class="contacto-button">Enviar</button>
+            </form>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>2025 © MayoMotors</p>
+        </div>
+    </footer>
+</body>
+</html>
