@@ -67,7 +67,7 @@ mostrarHeader('Contacto');
             <textarea id="mensaje" name="mensaje" class="form-control" rows="6" required><?php echo isset($_POST['mensaje']) ? $_POST['mensaje'] : ''; ?></textarea>
         </div>
         
-        <div class="form-group text-center">
+        <div class="btn-container">
             <button type="submit" class="btn btn-primary">Enviar</button>
         </div>
     </form>

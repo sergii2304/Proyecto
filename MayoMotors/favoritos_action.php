@@ -67,8 +67,8 @@ if ($result->num_rows > 0) {
     }
 } else {
     // No está en favoritos, añadir
-    $añadir = "INSERT INTO Guardar (id_usuario, id_coche) VALUES (?, ?)";
-    $stmt = $conn->prepare($añadir);
+    $aniadir = "INSERT INTO Guardar (id_usuario, id_coche) VALUES (?, ?)";
+    $stmt = $conn->prepare($aniadir);
     $stmt->bind_param("ss", $usuario_id, $coche_id);
     
     if ($stmt->execute()) {

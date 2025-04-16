@@ -7,24 +7,25 @@ if (!estaLogueado()) {
     redirigir('login.php');
 }
 
-// Obtener favoritos del usuario
-$sql = "SELECT c.id_coche, c.matricula, c.precio, c.color, c.cambio, c.ano, c.combustible, c.cv, 
-               mar.nombre as marca, mod.nombre as modelo, 
-               p.nombre as provincia, img.url as imagen
-        FROM Guardar g
-        INNER JOIN Coches c ON g.id_coche = c.id_coche
-        INNER JOIN Modelos mod ON c.id_modelo = mod.id_modelo
-        INNER JOIN Marcas mar ON mod.id_marca = mar.id_marca
-        INNER JOIN Provincias p ON c.id_provincia = p.id_provincia
-        LEFT JOIN Imagenes img ON c.id_coche = img.id_coche
-        WHERE g.id_usuario = ?
-        GROUP BY c.id_coche
-        ORDER BY c.fecha DESC";
+// Obtener coches favoritos - Consulta muy simplificada sin alias complejos
+$sql = "SELECT g.id_coche 
+        FROM Guardar AS g 
+        WHERE g.id_usuario = ?";
 
 $stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Error en la consulta: " . $conn->error);
+}
+
 $stmt->bind_param("s", $_SESSION['usuario_id']);
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Recolectar IDs de coches favoritos
+$coches_ids = [];
+while ($row = $result->fetch_assoc()) {
+    $coches_ids[] = $row['id_coche'];
+}
 
 mostrarHeader('Favoritos');
 ?>
@@ -33,14 +34,57 @@ mostrarHeader('Favoritos');
 
 <!-- Lista de coches favoritos -->
 <div class="car-grid">
-    <?php if ($result->num_rows > 0): ?>
-        <?php while ($coche = $result->fetch_assoc()): ?>
+    <?php if (!empty($coches_ids)): ?>
+        <?php foreach ($coches_ids as $coche_id): ?>
+            <?php
+            // Obtener información del coche
+            $coche_sql = "SELECT c.id_coche, c.matricula, c.precio, c.color, c.combustible, c.ano,
+                          m1.nombre AS marca, m2.nombre AS modelo, p.nombre AS provincia
+                          FROM Coches AS c
+                          INNER JOIN Modelos AS m2 ON c.id_modelo = m2.id_modelo
+                          INNER JOIN Marcas AS m1 ON m2.id_marca = m1.id_marca
+                          INNER JOIN Provincias AS p ON c.id_provincia = p.id_provincia
+                          WHERE c.id_coche = ?";
+            
+            $coche_stmt = $conn->prepare($coche_sql);
+            if (!$coche_stmt) {
+                continue; // Saltar este coche si hay error
+            }
+            
+            $coche_stmt->bind_param("s", $coche_id);
+            $coche_stmt->execute();
+            $coche_result = $coche_stmt->get_result();
+            
+            if ($coche_result->num_rows === 0) {
+                continue; // Saltar si no hay datos
+            }
+            
+            $coche = $coche_result->fetch_assoc();
+            
+            // Buscar la primera imagen para este coche
+            $imagen_url = 'img/no-image.png'; // Imagen por defecto
+            
+            $img_sql = "SELECT url FROM Imagenes WHERE id_coche = ? LIMIT 1";
+            $img_stmt = $conn->prepare($img_sql);
+            if ($img_stmt) {
+                $img_stmt->bind_param("s", $coche_id);
+                $img_stmt->execute();
+                $img_result = $img_stmt->get_result();
+                
+                if ($img_result->num_rows > 0) {
+                    $imagen = $img_result->fetch_assoc();
+                    $imagen_url = $imagen['url'];
+                }
+            }
+            ?>
+            
             <div class="car-card">
-                <img src="<?php echo !empty($coche['imagen']) ? $coche['imagen'] : 'img/no-image.png'; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo']; ?>" class="car-image">
+                <img src="<?php echo $imagen_url; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo']; ?>" class="car-image">
                 
                 <div class="car-info">
                     <h3 class="car-title"><?php echo $coche['marca'] . ' ' . $coche['modelo']; ?></h3>
                     <p class="car-price"><?php echo number_format($coche['precio'], 2, ',', '.') . ' €'; ?></p>
+                    <p><?php echo $coche['ano'] . ' - ' . $coche['combustible']; ?></p>
                     
                     <div class="car-actions">
                         <a href="detalle_coche.php?id=<?php echo $coche['id_coche']; ?>" class="btn btn-primary car-btn">Ver Detalles</a>
@@ -51,7 +95,7 @@ mostrarHeader('Favoritos');
                     </div>
                 </div>
             </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     <?php else: ?>
         <div class="alert alert-info" style="grid-column: 1 / -1;">
             No tienes coches en tu lista de favoritos.

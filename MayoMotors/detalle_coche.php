@@ -11,11 +11,11 @@ $coche_id = $_GET['id'];
 
 // Obtener detalles del coche
 $sql = "SELECT c.id_coche, c.matricula, c.precio, c.color, c.cambio, c.ano, c.combustible, c.cv, c.fecha,
-               mar.nombre as marca, mod.nombre as modelo, 
+               M.nombre as marca, MD.nombre as modelo, 
                p.nombre as provincia, u.nombre as vendedor, u.telefono, u.correo
         FROM Coches c
-        INNER JOIN Modelos mod ON c.id_modelo = mod.id_modelo
-        INNER JOIN Marcas mar ON mod.id_marca = mar.id_marca
+        INNER JOIN Modelos MD ON c.id_modelo = MD.id_modelo
+        INNER JOIN Marcas M ON MD.id_marca = M.id_marca
         INNER JOIN Provincias p ON c.id_provincia = p.id_provincia
         INNER JOIN Usuarios u ON c.id_usuario = u.id_usuario
         WHERE c.id_coche = ?";
@@ -63,25 +63,50 @@ if (estaLogueado()) {
     $es_favorito = $stmt->get_result()->num_rows > 0;
 }
 
+// Obtener el tipo del coche si existe la columna
+$tipo = "Turismo";
+$check_tipo = $conn->query("SHOW COLUMNS FROM Coches LIKE 'tipo'");
+if ($check_tipo && $check_tipo->num_rows > 0) {
+    $tipo_sql = "SELECT tipo FROM Coches WHERE id_coche = ?";
+    $stmt_tipo = $conn->prepare($tipo_sql);
+    $stmt_tipo->bind_param("s", $coche_id);
+    $stmt_tipo->execute();
+    $tipo_result = $stmt_tipo->get_result();
+    if ($tipo_result->num_rows > 0) {
+        $tipo_row = $tipo_result->fetch_assoc();
+        $tipo = $tipo_row['tipo'];
+    }
+}
+
 mostrarHeader('Detalle del coche');
 ?>
 
 <h1 class="title"><?php echo $coche['marca'] . ' ' . $coche['modelo']; ?></h1>
 
 <div class="details-container">
-    <!-- Imagen principal del coche -->
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="<?php echo $imagenes[0]; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo']; ?>" class="details-image" style="max-width: 600px;">
-    </div>
-    
-    <!-- Galería de imágenes (si hay más de una) -->
-    <?php if (count($imagenes) > 1): ?>
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-            <?php foreach ($imagenes as $index => $imagen): ?>
-                <img src="<?php echo $imagen; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo'] . ' ' . ($index + 1); ?>" style="width: 100px; height: 75px; object-fit: cover; cursor: pointer;" onclick="mostrarImagen('<?php echo $imagen; ?>')">
-            <?php endforeach; ?>
+    <!-- Carrusel de imágenes -->
+    <div class="carousel-container">
+        <div class="carousel-wrapper">
+            <div class="carousel-slides">
+                <?php foreach ($imagenes as $index => $imagen): ?>
+                    <div class="carousel-slide <?php echo $index === 0 ? 'active' : ''; ?>">
+                        <img src="<?php echo $imagen; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo'] . ' ' . ($index + 1); ?>">
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <?php if (count($imagenes) > 1): ?>
+                <button class="carousel-button prev" onclick="moveSlide(-1)">&#10094;</button>
+                <button class="carousel-button next" onclick="moveSlide(1)">&#10095;</button>
+                
+                <div class="carousel-indicators">
+                    <?php foreach ($imagenes as $index => $imagen): ?>
+                        <span class="carousel-dot <?php echo $index === 0 ? 'active' : ''; ?>" onclick="currentSlide(<?php echo $index + 1; ?>)"></span>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
-    <?php endif; ?>
+    </div>
     
     <!-- Detalles del coche -->
     <div class="details-grid">
@@ -97,7 +122,7 @@ mostrarHeader('Detalle del coche');
         
         <div class="form-group">
             <label>Tipo</label>
-            <input type="text" class="form-control" readonly value="Turismo">
+            <input type="text" class="form-control" readonly value="<?php echo $tipo; ?>">
         </div>
         
         <div class="form-group">
@@ -153,7 +178,7 @@ mostrarHeader('Detalle del coche');
         <div class="form-group description-box">
             <label>Descripción</label>
             <p style="margin-top: 10px;">
-                <?php echo $coche['marca'] . ' ' . $coche['modelo'] . ' ' . $coche['ano'] . ' en perfecto estado. Turismo, ' . $coche['combustible'] . ', ' . $coche['cambio'] . ', ' . $coche['cv'] . ' CV. Color ' . $coche['color'] . '.'; ?>
+                <?php echo $coche['marca'] . ' ' . $coche['modelo'] . ' ' . $coche['ano'] . ' en perfecto estado. ' . $tipo . ', ' . $coche['combustible'] . ', ' . $coche['cambio'] . ', ' . $coche['cv'] . ' CV. Color ' . $coche['color'] . '.'; ?>
             </p>
         </div>
     </div>
@@ -167,16 +192,168 @@ mostrarHeader('Detalle del coche');
             </button>
         <?php endif; ?>
         
-        <a href="contacto.php" class="btn btn-primary">Contactar</a>
         <a href="coches.php" class="btn btn-danger" style="margin-left: 10px;">Cerrar</a>
     </div>
 </div>
 
-<script>
-// Función para mostrar imagen grande al hacer clic en una miniatura
-function mostrarImagen(url) {
-    document.querySelector('.details-image').src = url;
+<style>
+.carousel-container {
+    margin-bottom: 30px;
 }
+
+.carousel-wrapper {
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.carousel-slides {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    display: none;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+    display: block;
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 16px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.carousel-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.carousel-button.prev {
+    left: 15px;
+}
+
+.carousel-button.next {
+    right: 15px;
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.carousel-dot.active, .carousel-dot:hover {
+    background-color: white;
+}
+
+@media (max-width: 768px) {
+    .carousel-slides {
+        height: 300px;
+    }
+    
+    .carousel-button {
+        padding: 12px;
+        font-size: 16px;
+        width: 40px;
+        height: 40px;
+    }
+}
+</style>
+
+<script>
+// Funciones del carrusel
+let slideIndex = 1;
+showSlide(slideIndex);
+
+function moveSlide(n) {
+    showSlide(slideIndex += n);
+}
+
+function currentSlide(n) {
+    showSlide(slideIndex = n);
+}
+
+function showSlide(n) {
+    let slides = document.getElementsByClassName("carousel-slide");
+    let dots = document.getElementsByClassName("carousel-dot");
+    
+    if (n > slides.length) {
+        slideIndex = 1;
+    }
+    if (n < 1) {
+        slideIndex = slides.length;
+    }
+    
+    // Ocultar todas las diapositivas
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].classList.remove("active");
+    }
+    
+    // Desactivar todos los puntos
+    for (let i = 0; i < dots.length; i++) {
+        dots[i].classList.remove("active");
+    }
+    
+    // Mostrar la diapositiva actual
+    slides[slideIndex - 1].classList.add("active");
+    
+    // Activar el punto actual
+    if (dots.length > 0) {
+        dots[slideIndex - 1].classList.add("active");
+    }
+}
+
+// Añadir navegación con teclado
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') {
+        moveSlide(-1);
+    } else if (e.key === 'ArrowRight') {
+        moveSlide(1);
+    }
+});
 
 // Script para manejar favoritos
 document.addEventListener('DOMContentLoaded', function() {
@@ -212,6 +389,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
             });
         });
+    }
+    
+    // Iniciar carrusel automático
+    const slides = document.getElementsByClassName("carousel-slide");
+    if (slides.length > 1) {
+        setInterval(function() {
+            moveSlide(1);
+        }, 5000); // Cambiar slide cada 5 segundos
     }
 });
 </script>

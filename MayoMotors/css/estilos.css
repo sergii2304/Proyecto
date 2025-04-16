@@ -38,12 +38,23 @@ body {
 
 .nav a:hover {
     text-decoration: underline;
+    color: white;
 }
 
 .user-section {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.user-section a{
+    color: #004ADD;
+    text-decoration: none;
+}
+
+.user-section a:hover {
+    color: white;
+    text-decoration: underline;
 }
 
 .user-icon {
@@ -84,13 +95,39 @@ body {
     text-align: center;
 }
 
-/* Footer */
+/* Estilos Footer */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main {
+    width: 100%;
+    padding: 20px;
+}
+
 .footer {
+    flex-shrink: 0;
     background-color: #38B6FF;
     color: black;
     text-align: center;
-    padding: 10px;
-    margin-top: 20px;
+    padding: 10px 0;
+    width: 100%;
+    margin-top: auto;
 }
 
 /* Formularios */
@@ -144,11 +181,13 @@ body {
 .btn-primary {
     background-color: #38B6FF;
     color: white;
+    text-decoration: none;
 }
 
 .btn-danger {
     background-color: #dc3545;
     color: white;
+    text-decoration: none;
 }
 
 .btn-primary:hover {
@@ -165,6 +204,14 @@ body {
     color: #004ADD;
     text-decoration: none;
 }
+
+/* Centrar botones */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 
 /* Tarjetas de coches */
 .car-grid {
@@ -208,6 +255,7 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 10px;
+    padding-top: 10px;
 }
 
 .car-btn {

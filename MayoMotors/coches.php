@@ -10,13 +10,13 @@ $tipos = "";
 if (isset($_GET['buscar'])) {
     // Aplicar filtros
     if (!empty($_GET['marca'])) {
-        $where_conditions[] = "mar.nombre = ?";
+        $where_conditions[] = "M.nombre = ?";
         $params[] = $_GET['marca'];
         $tipos .= "s";
     }
     
     if (!empty($_GET['modelo'])) {
-        $where_conditions[] = "mod.nombre = ?";
+        $where_conditions[] = "MD.nombre = ?";
         $params[] = $_GET['modelo'];
         $tipos .= "s";
     }
@@ -71,53 +71,61 @@ if (isset($_GET['buscar'])) {
 }
 
 // Construir consulta SQL básica
-$sql = "SELECT c.id_coche, c.matricula, c.precio, c.color, c.cambio, c.ano, c.combustible, c.cv, 
-               mar.nombre as marca, mod.nombre as modelo, 
-               p.nombre as provincia, img.url as imagen
-        FROM Coches c
-        INNER JOIN Modelos mod ON c.id_modelo = mod.id_modelo
-        INNER JOIN Marcas mar ON mod.id_marca = mar.id_marca
-        INNER JOIN Provincias p ON c.id_provincia = p.id_provincia
-        LEFT JOIN Imagenes img ON c.id_coche = img.id_coche";
+$sql = "SELECT c.id_coche 
+        FROM Coches AS c
+        INNER JOIN Modelos AS MD ON c.id_modelo = MD.id_modelo
+        INNER JOIN Marcas AS M ON MD.id_marca = M.id_marca
+        INNER JOIN Provincias AS p ON c.id_provincia = p.id_provincia";
 
 // Agregar condiciones de filtro si existen
 if (!empty($where_conditions)) {
     $sql .= " WHERE " . implode(" AND ", $where_conditions);
 }
 
-$sql .= " GROUP BY c.id_coche ORDER BY c.fecha DESC";
+$sql .= " ORDER BY c.fecha DESC";
+
+// Array para almacenar los IDs de coches
+$coches_ids = [];
 
 // Preparar y ejecutar consulta
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("Error en la preparación de la consulta: " . $conn->error);
-}
-
 if (!empty($params)) {
-    // Método alternativo para bind_param con array de parámetros
-    $types = $tipos;
-    $bind_names[] = $types;
-    for ($i = 0; $i < count($params); $i++) {
-        $bind_name = 'bind' . $i;
-        $$bind_name = $params[$i];
-        $bind_names[] = &$$bind_name;
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Error en la preparación de la consulta: " . $conn->error);
     }
-    call_user_func_array(array($stmt, 'bind_param'), $bind_names);
+    
+    // Método alternativo para bind_param con array de parámetros para PHP 8
+    $bindParams = [$tipos];
+    foreach ($params as $key => $value) {
+        $bindParams[] = &$params[$key];
+    }
+    call_user_func_array([$stmt, 'bind_param'], $bindParams);
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $coches_ids[] = $row['id_coche'];
+    }
+} else {
+    $result = $conn->query($sql);
+    
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $coches_ids[] = $row['id_coche'];
+        }
+    }
 }
 
-if (!$stmt->execute()) {
-    die("Error al ejecutar la consulta: " . $stmt->error);
-}
-
-$result = $stmt->get_result();
-
-// Obtener marcas, modelos y provincias para los filtros
-$marcas_sql = "SELECT nombre FROM Marcas ORDER BY nombre";
+// Obtener marcas para los filtros - ahora incluye id_marca
+$marcas_sql = "SELECT id_marca, nombre FROM Marcas ORDER BY nombre";
 $marcas_result = $conn->query($marcas_sql);
 
+// Obtener modelos - estos serán filtrados dinámicamente por JavaScript
 $modelos_sql = "SELECT nombre FROM Modelos ORDER BY nombre";
 $modelos_result = $conn->query($modelos_sql);
 
+// Obtener provincias para los filtros
 $provincias_sql = "SELECT nombre FROM Provincias ORDER BY nombre";
 $provincias_result = $conn->query($provincias_sql);
 
@@ -125,7 +133,7 @@ $provincias_result = $conn->query($provincias_sql);
 $anos = range(date('Y'), date('Y') - 30);
 $combustibles = ['Gasolina', 'Diesel', 'Híbrido', 'Eléctrico', 'GLP', 'Gas Natural'];
 $cambios = ['Manual', 'Automático'];
-$colores = ['Blanco', 'Negro', 'Gris', 'Plata', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Marrón', 'Beige'];
+$colores = ['Blanco','Negro','Gris/Plata','Azul','Rojo','Verde','Violeta','Rosa','Beis','Marrón','Bronce','Dorado','Naranja','Amarillo','Granate','Otros'];
 
 mostrarHeader('Lista de coches');
 ?>
@@ -135,7 +143,7 @@ mostrarHeader('Lista de coches');
 <!-- Filtros de búsqueda -->
 <div class="filter-container">
     <div class="form-border"></div>
-    <form action="coches.php" method="get">
+    <form action="coches.php" method="get" id="filter-form">
         <div class="filter-grid">
             <div class="form-group">
                 <label for="ano">Año</label>
@@ -153,8 +161,12 @@ mostrarHeader('Lista de coches');
                 <label for="marca">Marca</label>
                 <select id="marca" name="marca" class="form-control">
                     <option value="">Todas</option>
-                    <?php while ($marca = $marcas_result->fetch_assoc()): ?>
-                        <option value="<?php echo $marca['nombre']; ?>" <?php echo (isset($_GET['marca']) && $_GET['marca'] == $marca['nombre']) ? 'selected' : ''; ?>>
+                    <?php 
+                    // Reiniciamos el puntero del resultado
+                    $marcas_result->data_seek(0);
+                    while ($marca = $marcas_result->fetch_assoc()): 
+                    ?>
+                        <option value="<?php echo $marca['nombre']; ?>" data-id="<?php echo $marca['id_marca']; ?>" <?php echo (isset($_GET['marca']) && $_GET['marca'] == $marca['nombre']) ? 'selected' : ''; ?>>
                             <?php echo $marca['nombre']; ?>
                         </option>
                     <?php endwhile; ?>
@@ -165,11 +177,9 @@ mostrarHeader('Lista de coches');
                 <label for="modelo">Modelo</label>
                 <select id="modelo" name="modelo" class="form-control">
                     <option value="">Todos</option>
-                    <?php while ($modelo = $modelos_result->fetch_assoc()): ?>
-                        <option value="<?php echo $modelo['nombre']; ?>" <?php echo (isset($_GET['modelo']) && $_GET['modelo'] == $modelo['nombre']) ? 'selected' : ''; ?>>
-                            <?php echo $modelo['nombre']; ?>
-                        </option>
-                    <?php endwhile; ?>
+                    <?php if(isset($_GET['modelo']) && !empty($_GET['modelo'])): ?>
+                        <option value="<?php echo $_GET['modelo']; ?>" selected><?php echo $_GET['modelo']; ?></option>
+                    <?php endif; ?>
                 </select>
             </div>
             
@@ -223,17 +233,17 @@ mostrarHeader('Lista de coches');
             
             <div class="form-group">
                 <label for="cv">CV mínimos</label>
-                <input type="number" id="cv" name="cv" class="form-control" value="<?php echo isset($_GET['cv']) ? htmlspecialchars($_GET['cv']) : ''; ?>">
+                <input type="number" id="cv" name="cv" min="65" class="form-control" value="<?php echo isset($_GET['cv']) ? htmlspecialchars($_GET['cv']) : ''; ?>">
             </div>
             
             <div class="form-group">
                 <label for="precio_min">Precio mínimo</label>
-                <input type="number" id="precio_min" name="precio_min" class="form-control" value="<?php echo isset($_GET['precio_min']) ? htmlspecialchars($_GET['precio_min']) : ''; ?>">
+                <input type="number" id="precio_min" name="precio_min" min="1" class="form-control" value="<?php echo isset($_GET['precio_min']) ? htmlspecialchars($_GET['precio_min']) : ''; ?>">
             </div>
             
             <div class="form-group">
                 <label for="precio_max">Precio máximo</label>
-                <input type="number" id="precio_max" name="precio_max" class="form-control" value="<?php echo isset($_GET['precio_max']) ? htmlspecialchars($_GET['precio_max']) : ''; ?>">
+                <input type="number" id="precio_max" name="precio_max" min="1" class="form-control" value="<?php echo isset($_GET['precio_max']) ? htmlspecialchars($_GET['precio_max']) : ''; ?>">
             </div>
         </div>
         
@@ -246,10 +256,52 @@ mostrarHeader('Lista de coches');
 
 <!-- Lista de coches -->
 <div class="car-grid">
-    <?php if ($result->num_rows > 0): ?>
-        <?php while ($coche = $result->fetch_assoc()): ?>
+    <?php if (!empty($coches_ids)): ?>
+        <?php foreach ($coches_ids as $coche_id): ?>
+            <?php
+            // Obtener información del coche
+            $coche_sql = "SELECT c.id_coche, c.matricula, c.precio, c.color, c.combustible, c.ano,
+                          M.nombre AS marca, MD.nombre AS modelo, p.nombre AS provincia
+                          FROM Coches AS c
+                          INNER JOIN Modelos AS MD ON c.id_modelo = MD.id_modelo
+                          INNER JOIN Marcas AS M ON MD.id_marca = M.id_marca
+                          INNER JOIN Provincias AS p ON c.id_provincia = p.id_provincia
+                          WHERE c.id_coche = ?";
+            
+            $coche_stmt = $conn->prepare($coche_sql);
+            if (!$coche_stmt) {
+                continue; // Saltar este coche si hay error
+            }
+            
+            $coche_stmt->bind_param("s", $coche_id);
+            $coche_stmt->execute();
+            $coche_result = $coche_stmt->get_result();
+            
+            if ($coche_result->num_rows === 0) {
+                continue; // Saltar si no hay datos
+            }
+            
+            $coche = $coche_result->fetch_assoc();
+            
+            // Buscar la primera imagen para este coche
+            $imagen_url = 'img/no-image.png'; // Imagen por defecto
+            
+            $img_sql = "SELECT url FROM Imagenes WHERE id_coche = ? LIMIT 1";
+            $img_stmt = $conn->prepare($img_sql);
+            if ($img_stmt) {
+                $img_stmt->bind_param("s", $coche_id);
+                $img_stmt->execute();
+                $img_result = $img_stmt->get_result();
+                
+                if ($img_result->num_rows > 0) {
+                    $imagen = $img_result->fetch_assoc();
+                    $imagen_url = $imagen['url'];
+                }
+            }
+            ?>
+            
             <div class="car-card">
-                <img src="<?php echo !empty($coche['imagen']) ? $coche['imagen'] : 'img/no-image.png'; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo']; ?>" class="car-image">
+                <img src="<?php echo $imagen_url; ?>" alt="<?php echo $coche['marca'] . ' ' . $coche['modelo']; ?>" class="car-image">
                 
                 <div class="car-info">
                     <h3 class="car-title"><?php echo $coche['marca'] . ' ' . $coche['modelo']; ?></h3>
@@ -266,17 +318,26 @@ mostrarHeader('Lista de coches');
                             $favorito_stmt = $conn->prepare($favorito_sql);
                             $favorito_stmt->bind_param("ss", $_SESSION['usuario_id'], $coche['id_coche']);
                             $favorito_stmt->execute();
-                            $es_favorito = $favorito_stmt->get_result()->num_rows > 0;
+                            $favorito_result = $favorito_stmt->get_result();
+                            $es_favorito = $favorito_result->num_rows > 0;
                             ?>
                             
                             <button class="favorite-btn <?php echo $es_favorito ? 'active' : ''; ?>" data-id="<?php echo $coche['id_coche']; ?>">
                                 <i class="fas fa-heart"></i>
                             </button>
+                            
+                            <?php if (esAdmin()): ?>
+                                <a href="eliminar_coche.php?id=<?php echo $coche['id_coche']; ?>" 
+                                   class="btn btn-danger btn-sm delete-car-btn"
+                                   onclick="return confirm('¿Estás seguro de que deseas eliminar este coche? Esta acción no se puede deshacer.')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     <?php else: ?>
         <div class="alert alert-info" style="grid-column: 1 / -1;">
             No se encontraron coches con los filtros seleccionados.
@@ -285,8 +346,66 @@ mostrarHeader('Lista de coches');
 </div>
 
 <script>
-// Script para manejar favoritos
 document.addEventListener('DOMContentLoaded', function() {
+    // Cargar modelos según la marca seleccionada
+    const marcaSelect = document.getElementById('marca');
+    const modeloSelect = document.getElementById('modelo');
+    
+    // Función para cargar modelos según la marca seleccionada
+    function cargarModelos(marcaId, selectedModel = '') {
+        if (!marcaId) {
+            modeloSelect.innerHTML = '<option value="">Todos</option>';
+            if (selectedModel) {
+                const option = document.createElement('option');
+                option.value = selectedModel;
+                option.textContent = selectedModel;
+                option.selected = true;
+                modeloSelect.appendChild(option);
+            }
+            return;
+        }
+        
+        // Petición AJAX para obtener modelos
+        fetch('get_modelos.php?marca_id=' + marcaId)
+        .then(response => response.json())
+        .then(data => {
+            modeloSelect.innerHTML = '<option value="">Todos</option>';
+            
+            data.forEach(modelo => {
+                const option = document.createElement('option');
+                option.value = modelo.nombre;
+                option.textContent = modelo.nombre;
+                
+                // Si hay un modelo seleccionado previamente, marcarlo
+                if (selectedModel === modelo.nombre) {
+                    option.selected = true;
+                }
+                
+                modeloSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            modeloSelect.innerHTML = '<option value="">Error al cargar modelos</option>';
+        });
+    }
+    
+    // Manejar cambio en select de marca
+    marcaSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const marcaId = selectedOption ? selectedOption.getAttribute('data-id') : '';
+        cargarModelos(marcaId);
+    });
+    
+    // Cargar modelos iniciales si hay una marca seleccionada
+    if (marcaSelect.value) {
+        const selectedOption = marcaSelect.options[marcaSelect.selectedIndex];
+        const marcaId = selectedOption ? selectedOption.getAttribute('data-id') : '';
+        const selectedModel = '<?php echo isset($_GET["modelo"]) ? $_GET["modelo"] : ""; ?>';
+        cargarModelos(marcaId, selectedModel);
+    }
+    
+    // Script para manejar favoritos
     const favButtons = document.querySelectorAll('.favorite-btn');
     
     favButtons.forEach(btn => {
@@ -316,6 +435,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+/* Estilos para el botón de eliminar coches */
+.delete-car-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.delete-car-btn:hover {
+    background-color: #b02a37;
+    transform: scale(1.05);
+}
+
+/* Ajuste para los botones en las tarjetas de coches */
+.car-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+}
+
+.car-btn {
+    flex: 1;
+}
+</style>
 
 <?php
 mostrarFooter();

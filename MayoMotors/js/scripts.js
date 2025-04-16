@@ -1,4 +1,4 @@
-// Archivo con funciones JavaScript comunes para la aplicación
+// Archivo con funciones JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
     // Cerrar automáticamente las alertas después de 5 segundos
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
     
-    // Validaciones de formularios
+    // Validacion de formularios
     const formRegistro = document.getElementById('form-registro');
     
     if (formRegistro) {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Animación para tarjetas de coches
+    // Animacion para tarjetas de coches
     const carCards = document.querySelectorAll('.car-card');
     
     carCards.forEach(function(card) {
@@ -159,8 +159,9 @@ function validarEmail(email) {
     return re.test(email);
 }
 
-// Función para validar teléfono (formato español: 9 dígitos)
+// Función para validar teléfono
 function validarTelefono(telefono) {
     const re = /^[0-9]{9}$/;
     return re.test(telefono);
 }
+

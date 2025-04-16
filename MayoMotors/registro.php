@@ -118,8 +118,8 @@ mostrarHeader('Registro');
             <input type="password" id="repetir_contrasena" name="repetir_contrasena" class="form-control" required>
         </div>
         
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">Registro</button>
+        <div class="btn-container">
+        <button type="submit" class="btn btn-primary">Registro</button>
         </div>
     </form>
 </div>

@@ -63,8 +63,8 @@ mostrarHeader('Iniciar Sesión');
             <input type="password" id="contrasena" name="contrasena" class="form-control" required>
         </div>
         
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">Acceso</button>
+        <div class="btn-container">
+        <button type="submit" class="btn btn-primary">Acceso</button>
         </div>
     </form>
     

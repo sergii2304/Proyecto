@@ -12,6 +12,7 @@ function mostrarHeader($titulo) {
     <title><?php echo $titulo; ?> - MayoMotors</title>
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="js/scripts.js">
 </head>
 <body>
     <div id="wrapper">
@@ -74,7 +75,7 @@ function mostrarFooter() {
         </div>
         
         <footer class="footer">
-            2025 © MayoMotors
+            ¡¡¡¡¡     "2025 © MayoMotors      -----     Número de Atención al Cliente: 684101844     !!!!!           
         </footer>
     </div>
     

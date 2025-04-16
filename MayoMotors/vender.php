@@ -19,7 +19,7 @@ $provincias_result = $conn->query($provincias_sql);
 $anos = range(date('Y'), date('Y') - 30);
 $combustibles = ['Gasolina', 'Diesel', 'Híbrido', 'Eléctrico', 'GLP', 'Gas Natural'];
 $cambios = ['Manual', 'Automático'];
-$colores = ['Blanco', 'Negro', 'Gris', 'Plata', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Marrón', 'Beige'];
+$colores = ['Blanco','Negro','Gris/Plata','Azul','Rojo','Verde','Violeta','Rosa','Beis','Marrón','Bronce','Dorado','Naranja','Amarillo','Granate','Otros'];
 $tipos = ['Turismo', 'SUV', 'Deportivo', 'Familiar', 'Berlina', 'Compacto', 'Todoterreno', 'Coupe', 'Cabrio', 'Pickup', 'Furgoneta'];
 
 // Procesar formulario
@@ -40,11 +40,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validaciones
     $errores = [];
     
-    // Validar matrícula
-    if (empty($matricula) || !preg_match('/^[0-9]{4}[A-Z]{3}$/', $matricula)) {
-        $errores[] = 'La matrícula debe tener el formato correcto (ej: 1234ABC)';
+    // Validar matrícula (formato nuevo y antiguo)
+if (empty($matricula)) {
+    $errores[] = 'La matrícula es obligatoria';
+} else {
+    // Limpiar la matrícula de espacios y guiones
+    $matricula_limpia = strtoupper(str_replace(['-', ' '], '', $matricula));
+    
+    // Validar los dos formatos de matrícula
+    $formato_nuevo = preg_match('/^[0-9]{4}[A-Z]{3}$/', $matricula_limpia);
+    
+    $formato_personalizado = preg_match('/^[A-Z]{1,2}[0-9]{4}[A-Z]{1,2}$/', $matricula_limpia);
+    
+    if (!$formato_nuevo && !$formato_personalizado) {
+        $errores[] = 'La matrícula debe tener un formato válido. Ejemplos: 1234ABC o B1234XX o AB1234ZY';
     } else {
-        // Verificar que la matrícula no exista
+    
+        $matricula = $matricula_limpia;
+        
+        // Verificar que la matrícula no exista en la base de datos
         $sql = "SELECT id_coche FROM Coches WHERE matricula = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $matricula);
@@ -55,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errores[] = 'Esta matrícula ya está registrada';
         }
     }
+}
     
     // Validar precio
     if (empty($precio) || !is_numeric($precio) || $precio <= 0) {
@@ -83,7 +98,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Gestión de imágenes
     $imagenes_urls = [];
     
-    if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
+    // Validar que se hayan subido al menos 3 imágenes
+    if (!isset($_FILES['imagenes']) || empty($_FILES['imagenes']['name'][0])) {
+        $errores[] = 'Debes subir al menos 3 imágenes del coche';
+    } elseif (count($_FILES['imagenes']['name']) < 3) {
+        $errores[] = 'Debes subir al menos 3 imágenes del coche. Has subido ' . count($_FILES['imagenes']['name']);
+    } else {
         // Crear carpeta de imágenes si no existe
         $directorio_imagenes = 'img';
         if (!is_dir($directorio_imagenes)) {
@@ -92,11 +112,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Procesar cada imagen
         $total_files = count($_FILES['imagenes']['name']);
-        $max_files = 8; // Máximo de archivos permitidos
+        $max_files = 10; // Máximo de archivos permitidos
+        $min_files = 3;  // Mínimo de archivos permitidos
         
         if ($total_files > $max_files) {
             $errores[] = "Solo puedes subir un máximo de $max_files imágenes";
+        } elseif ($total_files < $min_files) {
+            $errores[] = "Debes subir al menos $min_files imágenes del coche";
         } else {
+            $valid_images_count = 0; // Contador de imágenes válidas
+            
             for ($i = 0; $i < $total_files; $i++) {
                 if ($_FILES['imagenes']['error'][$i] === UPLOAD_ERR_OK) {
                     $tmp_name = $_FILES['imagenes']['tmp_name'][$i];
@@ -118,6 +143,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         continue;
                     }
                     
+                    // Incrementar el contador de imágenes válidas
+                    $valid_images_count++;
+                    
                     // Crear nombre único
                     $file_extension = pathinfo($name, PATHINFO_EXTENSION);
                     $new_filename = 'car_' . uniqid() . '.' . $file_extension;
@@ -133,12 +161,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errores[] = "Error al subir el archivo #" . ($i + 1);
                 }
             }
+            
+            // Verificar si tenemos suficientes imágenes válidas
+            if ($valid_images_count < $min_files) {
+                $errores[] = "Debes subir al menos $min_files imágenes válidas. Solo se han procesado $valid_images_count correctamente.";
+            }
         }
-    }
-    
-    // Si no hay imágenes y no hay errores, usar una por defecto
-    if (empty($imagenes_urls) && empty($errores)) {
-        $imagenes_urls[] = 'img/no-image.png';
     }
     
     // Si no hay errores, registrar el coche
@@ -160,12 +188,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sql = "INSERT INTO Coches (id_coche, matricula, precio, color, cambio, ano, combustible, cv, fecha, id_usuario, id_provincia, id_modelo, tipo) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssdssississs", $id_coche, $matricula, $precio, $color, $cambio, $ano, $combustible, $cv, $fecha_actual, $_SESSION['usuario_id'], $id_provincia, $id_modelo, $tipo);
+                // Los tipos deben coincidir con el número de parámetros: 13 parámetros
+                $stmt->bind_param("ssdssisssssss", $id_coche, $matricula, $precio, $color, $cambio, $ano, $combustible, $cv, $fecha_actual, $_SESSION['usuario_id'], $id_provincia, $id_modelo, $tipo);
             } else {
                 $sql = "INSERT INTO Coches (id_coche, matricula, precio, color, cambio, ano, combustible, cv, fecha, id_usuario, id_provincia, id_modelo) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssdssississs", $id_coche, $matricula, $precio, $color, $cambio, $ano, $combustible, $cv, $fecha_actual, $_SESSION['usuario_id'], $id_provincia, $id_modelo);
+                // Los tipos deben coincidir con el número de parámetros: 12 parámetros
+                $stmt->bind_param("ssdssisssssss", $id_coche, $matricula, $precio, $color, $cambio, $ano, $combustible, $cv, $fecha_actual, $_SESSION['usuario_id'], $id_provincia, $id_modelo);
             }
             
             if (!$stmt->execute()) {
@@ -244,7 +274,7 @@ mostrarHeader('Vender coche');
             
             <div class="form-group">
                 <label for="matricula">Matrícula</label>
-                <input type="text" id="matricula" name="matricula" class="form-control" required placeholder="Formato: 1234ABC">
+                <input type="text" id="matricula" name="matricula" class="form-control" pattern="([0-9]{4}[A-Za-z]{3})|([A-Za-z]{1,2}[0-9]{4}[A-Za-z]{1,2})" required placeholder="Formato: 1234ABC o PA2345AB">
             </div>
             
             <div class="form-group">
@@ -274,7 +304,7 @@ mostrarHeader('Vender coche');
             
             <div class="form-group">
                 <label for="cv">CV</label>
-                <input type="number" id="cv" name="cv" class="form-control" required min="1">
+                <input type="number" id="cv" name="cv" class="form-control" required min="65">
             </div>
             
             <div class="form-group">
@@ -308,15 +338,16 @@ mostrarHeader('Vender coche');
                     <option value="">Selecciona provincia</option>
                     <?php while ($provincia = $provincias_result->fetch_assoc()): ?>
                         <option value="<?php echo $provincia['id_provincia']; ?>"><?php echo $provincia['nombre']; ?></option>
-                    <?php endwhile; ?>
+                    <?php endwhile ; ?>
                 </select>
             </div>
             
             <div class="form-group">
-                <label for="imagenes">Imágenes</label>
-                <input type="file" id="imagenes" name="imagenes[]" class="form-control" multiple accept="image/*">
-                <small class="text-muted">Puedes seleccionar varias imágenes (máx. 5). Formatos permitidos: JPG, PNG, GIF.</small>
+                <label for="imagenes">Imágenes (mín 3, máx 10)</label>
+                <input type="file" id="imagenes" name="imagenes[]" class="form-control" multiple accept="image/*" required>
+                <small class="text-muted">Selecciona entre 3 y 10 imágenes. Formatos permitidos: JPG, PNG, GIF.</small>
                 <div id="preview-container" style="display: flex; flex-wrap: wrap; margin-top: 10px;"></div>
+                <div id="image-count" class="text-muted" style="margin-top: 5px;"></div>
             </div>
             
             <div class="form-group description-box">
@@ -326,7 +357,7 @@ mostrarHeader('Vender coche');
         </div>
         
         <div style="text-align: center; margin-top: 20px;">
-            <button type="submit" class="btn btn-primary">Subir</button>
+            <button type="submit" class="btn btn-primary" id="submit-btn">Subir</button>
         </div>
     </form>
 </div>
@@ -337,17 +368,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const modeloSelect = document.getElementById('modelo');
     const imageInput = document.getElementById('imagenes');
     const previewContainer = document.getElementById('preview-container');
+    const imageCountDiv = document.getElementById('image-count');
+    const submitBtn = document.getElementById('submit-btn');
     
     // Vista previa de imágenes
     imageInput.addEventListener('change', function() {
         // Limpiar vistas previas anteriores
         previewContainer.innerHTML = '';
         
-        // Verificar número máximo de archivos
-        if (this.files.length > 5) {
-            alert('Solo puedes subir un máximo de 5 imágenes.');
+        const min_files = 3;
+        const max_files = 10;
+        
+        // Verificar número de archivos
+        if (this.files.length > max_files) {
+            alert(`Solo puedes subir un máximo de ${max_files} imágenes.`);
             this.value = ''; // Limpiar selección
+            imageCountDiv.textContent = 'Ninguna imagen seleccionada';
+            submitBtn.disabled = true;
             return;
+        }
+        
+        if (this.files.length < min_files) {
+            imageCountDiv.textContent = `Has seleccionado ${this.files.length} imágenes. Mínimo requerido: ${min_files}`;
+            imageCountDiv.style.color = 'red';
+            submitBtn.disabled = true;
+        } else {
+            imageCountDiv.textContent = `Has seleccionado ${this.files.length} imágenes.`;
+            imageCountDiv.style.color = 'green';
+            submitBtn.disabled = false;
         }
         
         // Mostrar vista previa de cada imagen
@@ -379,6 +427,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             reader.readAsDataURL(file);
+        }
+    });
+    
+    // Validación del formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const imageFiles = imageInput.files;
+        if (imageFiles.length < 3) {
+            e.preventDefault();
+            alert('Debes subir al menos 3 imágenes del coche.');
         }
     });
     

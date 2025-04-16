@@ -55,8 +55,8 @@ mostrarHeader('Recuperar contraseña');
             <input type="email" id="correo" name="correo" class="form-control" required>
         </div>
         
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary">Enviar instrucciones</button>
+        <div class="btn-container">
+        <button type="submit" class="btn btn-primary">Enviar instrucciones</button>
         </div>
     </form>
     
