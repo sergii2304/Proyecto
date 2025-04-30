@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - Usuarios</title>
+    <link rel="stylesheet" href="../MayoMotors/css/estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <nav class="container navbar-content">
+            <div class="nav-left">
+                <img src="css/logo.png" alt="Logo MayoMotors" class="nav-logo">
+                <ul class="nav-menu">
+                    <li><a href="../MayoMotors/Index_usuregistrado.html">Inicio</a></li>
+                    <li><a href="../MayoMotors/Lista_de_coches.html">Lista de coches</a></li>
+                    <li><a href="../MayoMotors/Contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="div-login">
+                <div class="admin-info">
+                    <img src="css/sesion.jpg" alt="Usuario" class="user-icon">
+                    <div class="dropdown-menu">
+                        <a href="favoritos.html">Favoritos</a>
+                        <a href="vender.html">Vender</a>
+                        <a href="admin_usuarios.html">Usuarios</a>
+                    </div>
+                    <div class="admin-text">
+                        <span>Administrador</span>
+                        <a href="../MayoMotors/Index.html" class="cerrar-sesion">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="admin-content">
+        <div class="container">
+            <h2 class="admin-title">Usuarios</h2>
+            
+            <table class="admin-users-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Sergio Mayo</td>
+                        <td>sergio@gmail.com</td>
+                        <td>684101844</td>
+                        <td style="text-align: center;">
+                            <button class="btn-eliminar">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sergio</td>
+                        <td>sergio@gmail.com</td>
+                        <td>684101844</td>
+                        <td style="text-align: center;">
+                            <button class="btn-eliminar">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sergio Mayo López</td>
+                        <td>sergio@gmail.com</td>
+                        <td>684101844</td>
+                        <td style="text-align: center;">
+                            <button class="btn-eliminar">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>2025 © MayoMotors</p>
+        </div>
+    </footer>
+</body>
+</html>
