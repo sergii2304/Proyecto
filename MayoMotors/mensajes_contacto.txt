@@ -1,0 +1,9 @@
+-----------------------------------
+Fecha: 2025-05-05 16:30:17
+ID: ID2081
+Nombre: Juan
+Correo: juanserranogonzalez56@gmail.com
+Mensaje:
+Les informo de que el coche Skoda gris no cumple con la normativa de la aplicación, ya que tiene imagenes no correspondientes a lo especificado.
+-----------------------------------
+
