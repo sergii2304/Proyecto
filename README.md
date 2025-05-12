@@ -8,7 +8,7 @@ MayoMotors es una plataforma web para la compraventa de coches de segunda mano c
 
 # Descripción
 
-La aplicación MayoMotors permite a los usuarios buscar coches filtrándolos por marca, modelo, precio, kilometraje y otros parámetros. Además, los usuarios registrados pueden publicar anuncios de venta de coches, gestionar sus anuncios y marcar coches como favoritos. Los administradores cuentan con funciones adicionales para gestionar usuarios y coches.
+La aplicación MayoMotors permite a los usuarios buscar coches filtrándolos por marca, modelo, precio y otros parámetros. Además, los usuarios registrados pueden publicar anuncios de venta de coches, gestionar sus anuncios y marcar coches como favoritos. Los administradores cuentan con funciones adicionales para gestionar usuarios y coches.
 
 # Funcionalidades
 
