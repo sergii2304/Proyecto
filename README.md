@@ -2,6 +2,10 @@
 
 MayoMotors es una plataforma web para la compraventa de coches de segunda mano centrada exclusivamente en marcas europeas. Este proyecto ha sido desarrollado como el proyecto final del ciclo de Administración de Sistemas Informáticos en Red por Sergio Mayo López.
 
+<p align="center">
+  <img width="660" height="250" src="https://github.com/user-attachments/assets/7d30f0dc-c5fa-44f7-866d-be0a718ce577">
+</p>
+
 # Descripción
 
 La aplicación MayoMotors permite a los usuarios buscar coches filtrándolos por marca, modelo, precio, kilometraje y otros parámetros. Además, los usuarios registrados pueden publicar anuncios de venta de coches, gestionar sus anuncios y marcar coches como favoritos. Los administradores cuentan con funciones adicionales para gestionar usuarios y coches.
