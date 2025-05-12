@@ -156,7 +156,7 @@ mostrarHeader('Administrar Usuarios');
                                     Eliminar
                                 </a>
                             <?php elseif ($usuario['id_usuario'] == 'ADMIN001'): ?>
-                                <span class="text-muted">Administrador principal</span>
+                                <span class="text-muted">Administrador</span>
                             <?php else: ?>
                                 <span class="text-muted">Sin acciones disponibles</span>
                             <?php endif; ?>
